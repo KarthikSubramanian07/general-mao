@@ -1,0 +1,26 @@
+{
+  "name": "@mao/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker: matchmaking API + the TableServer Durable Object.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@mao/ai": "*",
+    "@mao/engine": "*",
+    "@mao/protocol": "*",
+    "hono": "^4.6.14",
+    "partyserver": "0.5.8"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.18.5",
+    "wrangler": "^4.111.0",
+    "vitest": "^4.1.0"
+  }
+}

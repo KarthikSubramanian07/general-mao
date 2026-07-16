@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": true,
+    "composite": false,
+    "lib": ["ES2023"],
+    "types": ["@cloudflare/vitest-pool-workers/types"]
+  },
+  "references": [
+    { "path": "../../packages/protocol" },
+    { "path": "../../packages/engine" },
+    { "path": "../../packages/ai" }
+  ],
+  "include": ["src/**/*.ts", "worker-configuration.d.ts"]
+}
