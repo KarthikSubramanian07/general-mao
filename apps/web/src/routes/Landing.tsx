@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Seal, Wordmark } from "../components/Seal.js";
+import { useReveal } from "../lib/useReveal.js";
 
 const CRYPTIC = [
   { who: "The Defendant", reason: "Penalty: failure to announce." },
@@ -10,22 +11,15 @@ const CRYPTIC = [
 ];
 
 export function Landing() {
+  const root = useReveal<HTMLDivElement>();
   return (
-    <div className="landing">
+    <div className="landing" ref={root}>
       <header className="landing__nav">
         <Wordmark />
         <nav className="landing__navlinks">
           <a href="#how">How it works</a>
           <a href="#general">The General</a>
           <a href="#faq">Questions</a>
-          <a
-            className="btn btn--sm btn--ghost"
-            href="https://github.com/KarthikSubramanian07/general-mao"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Source
-          </a>
           <Link className="btn btn--sm btn--primary" to="/play">
             Convene a table
           </Link>
@@ -58,7 +52,7 @@ export function Landing() {
           </p>
         </div>
 
-        <aside className="hero__dossier" aria-label="A secret ruleset, redacted">
+        <aside className="hero__dossier reveal" aria-label="A secret ruleset, redacted">
           <div className="dossier">
             <div className="dossier__head">
               <span className="gm-label">Secret ruleset</span>
@@ -97,7 +91,7 @@ export function Landing() {
       </section>
 
       {/* ---- the one rule ---- */}
-      <section className="one-rule" id="the-one-rule">
+      <section className="one-rule reveal" id="the-one-rule">
         <Seal size={44} />
         <p className="one-rule__text gm-general">"The only rule I may tell you is this one."</p>
         <p className="one-rule__sub">
@@ -107,9 +101,9 @@ export function Landing() {
 
       {/* ---- how it works (a real sequence) ---- */}
       <section className="how" id="how">
-        <h2 className="section-title gm-general">The loop is cruel and simple</h2>
+        <h2 className="section-title gm-general reveal">The loop is cruel and simple</h2>
         <ol className="steps">
-          <li className="step">
+          <li className="step reveal" style={{ "--reveal-delay": "0ms" } as CSSProperties}>
             <span className="step__n gm-mono">01</span>
             <h3>Play a card</h3>
             <p>
@@ -117,7 +111,7 @@ export function Landing() {
               to win. That is the part you're allowed to know.
             </p>
           </li>
-          <li className="step">
+          <li className="step reveal" style={{ "--reveal-delay": "90ms" } as CSSProperties}>
             <span className="step__n gm-mono">02</span>
             <h3>Take the penalty</h3>
             <p>
@@ -125,7 +119,7 @@ export function Landing() {
               sin, but only the category: "improper address," never what address was correct.
             </p>
           </li>
-          <li className="step">
+          <li className="step reveal" style={{ "--reveal-delay": "180ms" } as CSSProperties}>
             <span className="step__n gm-mono">03</span>
             <h3>Crack the pattern</h3>
             <p>
@@ -138,7 +132,7 @@ export function Landing() {
 
       {/* ---- the General ---- */}
       <section className="general" id="general">
-        <div className="general__copy">
+        <div className="general__copy reveal">
           <h2 className="section-title gm-general">The General does not answer to you</h2>
           <p>
             A human rulemaster always already knows the rules, which spoils it for them and makes it
@@ -151,7 +145,7 @@ export function Landing() {
             else, which is somehow worse.
           </p>
         </div>
-        <div className="general__ledger" role="group" aria-label="Sample ledger">
+        <div className="general__ledger reveal" role="group" aria-label="Sample ledger">
           <div className="ledger__head">
             <span className="ledger__title">The Ledger</span>
             <span className="ledger__count">4 entries</span>
@@ -171,27 +165,27 @@ export function Landing() {
 
       {/* ---- modes ---- */}
       <section className="modes">
-        <h2 className="section-title gm-general">The General has moods</h2>
+        <h2 className="section-title gm-general reveal">The General has moods</h2>
         <div className="modes__list">
-          <div className="mode">
+          <div className="mode reveal">
             <h3 className="gm-general">Classic</h3>
             <p>A complete, unknown ruleset. Nobody knows anything. Maximum Mao. The default.</p>
           </div>
-          <div className="mode">
+          <div className="mode reveal">
             <h3 className="gm-general">Themed decks</h3>
             <p>
               Victorian Court. Superstition. The Ministry. Pick the flavor; you still don't know the
               rules.
             </p>
           </div>
-          <div className="mode">
+          <div className="mode reveal">
             <h3 className="gm-general">Practice</h3>
             <p>
               The rules are shown. Not really Mao anymore, but the on-ramp for anyone who's never
               shed a card.
             </p>
           </div>
-          <div className="mode">
+          <div className="mode reveal">
             <h3 className="gm-general">Bring your own</h3>
             <p>
               Author a devious ruleset in plain English. The General structures and enforces it, and
@@ -203,8 +197,8 @@ export function Landing() {
 
       {/* ---- FAQ ---- */}
       <section className="faq" id="faq">
-        <h2 className="section-title gm-general">Questions the General will permit</h2>
-        <div className="faq__list">
+        <h2 className="section-title gm-general reveal">Questions the General will permit</h2>
+        <div className="faq__list reveal">
           <Faq q="Do I need an account?">
             No. The host convenes a table, shares a six-character code, and friends join on any
             device with a browser. An optional magic-link login is offered only after your first
@@ -246,13 +240,6 @@ export function Landing() {
           <p className="gm-general">"The only rule I may tell you is this one."</p>
           <div className="landing__footer-links">
             <Link to="/play">Convene a table</Link>
-            <a
-              href="https://github.com/KarthikSubramanian07/general-mao"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Source
-            </a>
             <a href="https://buymeacoffee.com/winnerkarthik" target="_blank" rel="noreferrer">
               Buy the General a coffee
             </a>

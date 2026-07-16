@@ -513,7 +513,7 @@ function ConnPill({ status }: { status: "connecting" | "open" | "closed" }) {
   const label =
     status === "open" ? "in session" : status === "connecting" ? "connecting" : "reconnecting";
   return (
-    <span className="chip" title={`Connection: ${status}`}>
+    <span className="chip conn-pill" title={`Connection: ${status}`}>
       <span className={`seat__dot ${status === "open" ? "" : "seat__dot--off"}`} />
       {label}
     </span>

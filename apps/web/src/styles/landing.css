@@ -35,11 +35,12 @@
 .hero {
   max-width: var(--content);
   margin: 0 auto;
-  padding: clamp(2.5rem, 6vw, 5rem) var(--sp-5) var(--sp-8);
+  padding: clamp(1.5rem, 3.5vw, 3rem) var(--sp-5) clamp(2.5rem, 5vw, 4rem);
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: clamp(2rem, 5vw, 4rem);
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(2rem, 5vw, 3.5rem);
   align-items: center;
+  min-height: min(80vh, 640px);
 }
 @media (max-width: 860px) {
   .hero {
@@ -56,8 +57,8 @@
   color: var(--gm-text-2);
 }
 .hero__lede {
-  margin-top: var(--sp-5);
-  max-width: 42ch;
+  margin-top: var(--sp-4);
+  max-width: 46ch;
   font-size: var(--fs-hero-sub);
   color: var(--gm-text-2);
   line-height: 1.5;
@@ -438,4 +439,84 @@
 }
 .notfound h1 {
   font-size: clamp(2rem, 6vw, 3.5rem);
+}
+
+/* ---- scroll reveal + motion polish ------------------------------------- */
+html {
+  scroll-behavior: smooth;
+}
+.js .reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .js .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* hover polish */
+.hero__dossier {
+  transition: transform 0.5s var(--ease-out);
+}
+.dossier {
+  transition:
+    transform 0.5s var(--ease-out),
+    box-shadow 0.5s var(--ease-out);
+}
+.hero__dossier:hover .dossier {
+  transform: rotate(-0.4deg) translateY(-4px);
+  box-shadow:
+    0 0 0 1px var(--gm-line-strong),
+    0 24px 60px -20px oklch(0 0 0 / 0.8);
+}
+.mode {
+  transition: background 0.25s var(--ease-out);
+}
+.mode:hover {
+  background: var(--gm-surface-2);
+}
+.faq-item summary {
+  transition: color 0.2s var(--ease-out);
+}
+.faq-item summary:hover {
+  color: var(--gm-brass);
+}
+.landing__navlinks > a:not(.btn) {
+  position: relative;
+}
+.landing__navlinks > a:not(.btn)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 0;
+  background: var(--gm-penalty);
+  transition: width 0.25s var(--ease-out);
+}
+.landing__navlinks > a:not(.btn):hover::after {
+  width: 100%;
+}
+.landing__footer-links a {
+  transition: color 0.2s var(--ease-out);
+}
+
+/* FAQ answers should span the column, not stop at half width */
+.faq-item p {
+  max-width: none;
 }

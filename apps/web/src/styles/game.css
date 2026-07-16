@@ -736,3 +736,17 @@
     --card-h: 5.6rem;
   }
 }
+
+/* ---- mobile top bar: keep it from crowding ----------------------------- */
+@media (max-width: 620px) {
+  .table-top {
+    padding: var(--sp-2) var(--sp-3);
+    gap: var(--sp-2);
+  }
+  .table-top .conn-pill {
+    display: none;
+  }
+  .table-top .rail-toggle {
+    padding: 0.4rem 0.6rem;
+  }
+}
