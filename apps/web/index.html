@@ -4,49 +4,97 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#15181d" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="author" content="General Mao" />
 
     <title>General Mao, the card game where the house makes the rules</title>
     <meta
       name="description"
-      content="Free online Mao. The secret rules aren't invented by a player, they're invented and enforced by an AI that never explains. You learn them only by breaking them. Convene a table in seconds, no signup."
+      content="Free online Mao. Secret rules are invented and enforced by an AI that never explains. Learn them only by breaking them. Convene a table in seconds, no signup."
+    />
+    <meta
+      name="keywords"
+      content="Mao, card game, online multiplayer, AI referee, deduction, secret rules, free browser game"
     />
     <link rel="canonical" href="https://general-mao.pages.dev/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/og.png" />
     <meta name="color-scheme" content="dark" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="General Mao" />
-    <meta property="og:title" content="General Mao, the house makes the rules, and won't tell you what they are" />
+    <meta
+      property="og:title"
+      content="General Mao, the house makes the rules, and won't tell you what they are"
+    />
     <meta
       property="og:description"
       content="Online Mao refereed by an AI that invents the secret rules and refuses to explain them. Break a rule, take a penalty card, deduce the law. No signup."
     />
     <meta property="og:url" content="https://general-mao.pages.dev/" />
-    <meta property="og:image" content="https://general-mao.pages.dev/og.svg" />
+    <meta property="og:image" content="https://general-mao.pages.dev/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="General Mao, an AI invents the secret rules of Mao" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="General Mao" />
     <meta
       name="twitter:description"
-      content="An AI invents the secret rules of Mao and refuses to explain them. You deduce the law one penalty card at a time."
+      content="An AI invents the secret rules of Mao and refuses to explain them. Deduce the law one penalty card at a time."
     />
-    <meta name="twitter:image" content="https://general-mao.pages.dev/og.svg" />
+    <meta name="twitter:image" content="https://general-mao.pages.dev/og.png" />
+    <meta name="twitter:image:alt" content="General Mao, an AI invents the secret rules of Mao" />
 
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Game",
-        "name": "General Mao",
-        "url": "https://general-mao.pages.dev/",
-        "genre": "Card game",
-        "gamePlatform": "Web browser",
-        "playMode": "MultiPlayer",
-        "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 6 },
-        "description": "Free online Mao: a shedding card game whose secret rules are invented and enforced by an AI that never explains them. Players deduce the rules by being penalized.",
-        "isAccessibleForFree": true,
-        "applicationCategory": "Game"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://general-mao.pages.dev/#website",
+            "url": "https://general-mao.pages.dev/",
+            "name": "General Mao",
+            "description": "Free online Mao refereed by an AI that invents secret rules and refuses to explain them.",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://general-mao.pages.dev/#app",
+            "name": "General Mao",
+            "url": "https://general-mao.pages.dev/",
+            "applicationCategory": "GameApplication",
+            "operatingSystem": "Web browser",
+            "browserRequirements": "Requires JavaScript and WebSockets",
+            "isAccessibleForFree": true,
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "description": "Free online Mao: a shedding card game whose secret rules are invented and enforced by an AI that never explains them."
+          },
+          {
+            "@type": "VideoGame",
+            "name": "General Mao",
+            "url": "https://general-mao.pages.dev/",
+            "genre": ["Card game", "Deduction", "Multiplayer"],
+            "gamePlatform": "Web browser",
+            "playMode": ["MultiPlayer", "CoOp"],
+            "numberOfPlayers": {
+              "@type": "QuantitativeValue",
+              "minValue": 2,
+              "maxValue": 6
+            },
+            "description": "Players deduce secret Mao rules invented by an AI referee, one penalty card at a time.",
+            "isAccessibleForFree": true,
+            "applicationCategory": "Game"
+          }
+        ]
       }
     </script>
   </head>

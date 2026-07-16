@@ -9,7 +9,7 @@ import type {
 import { PartySocket } from "partysocket";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WS_HOST } from "./config.js";
-import { getName, getPlayerId } from "./identity.js";
+import { getName, getPlayerId, getTableToken, setTableToken } from "./identity.js";
 
 export interface FeedItem {
   id: string;
@@ -57,7 +57,12 @@ export function useTable(code: string, spectate: boolean) {
       host: WS_HOST,
       party: "table",
       room: code,
-      query: { id: getPlayerId(), name: getName(), spectate: spectate ? "1" : "0" },
+      query: {
+        id: getPlayerId(),
+        name: getName(),
+        token: getTableToken(code),
+        spectate: spectate ? "1" : "0",
+      },
     });
     socketRef.current = socket;
 
@@ -97,6 +102,7 @@ export function useTable(code: string, spectate: boolean) {
       }
       switch (msg.t) {
         case "welcome":
+          if (msg.token) setTableToken(code, msg.token);
           setView((v) => ({ ...v, youId: msg.youId }));
           break;
         case "snapshot":

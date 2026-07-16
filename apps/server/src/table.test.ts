@@ -22,8 +22,10 @@ interface Client {
   close(): void;
 }
 
-async function connect(code: string, id: string, name: string): Promise<Client> {
-  const res = await SELF.fetch(`${BASE}/parties/table/${code}?id=${id}&name=${name}`, {
+async function connect(code: string, id: string, name: string, token = ""): Promise<Client> {
+  const q = new URLSearchParams({ id, name });
+  if (token) q.set("token", token);
+  const res = await SELF.fetch(`${BASE}/parties/table/${code}?${q}`, {
     headers: { Upgrade: "websocket" },
   });
   const ws = res.webSocket;
@@ -58,6 +60,13 @@ async function connect(code: string, id: string, name: string): Promise<Client> 
       ws.close();
     },
   };
+}
+
+function welcomeToken(client: Client): string {
+  for (const m of client.messages) {
+    if (m.t === "welcome" && m.token) return m.token;
+  }
+  return "";
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -172,5 +181,41 @@ describe("anti-leak over live WebSocket traffic", () => {
 
     a.close();
     b.close();
+  });
+});
+
+describe("seat claim tokens", () => {
+  it("rejects reconnect with the same playerId but no seat token", async () => {
+    const create = await SELF.fetch(`${BASE}/api/tables`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ config: { mode: "classic", difficulty: "standard" } }),
+    });
+    const { code } = await create.json<{ code: string }>();
+
+    const owner = await connect(code, "owner-id", "Owner");
+    const snap = await waitFor(() => owner.latestSnapshot());
+    expect(snap.you.spectator).toBe(false);
+    expect(snap.you.seat).toBe(0);
+    const token = welcomeToken(owner);
+    expect(token.length).toBeGreaterThan(10);
+
+    owner.close();
+    await sleep(50);
+
+    // Attacker knows the playerId but not the seat secret.
+    const thief = await connect(code, "owner-id", "Thief");
+    const thiefSnap = await waitFor(() => thief.latestSnapshot());
+    expect(thiefSnap.you.spectator).toBe(true);
+    expect(thiefSnap.you.seat).toBeNull();
+    expect(thiefSnap.you.hand).toEqual([]);
+    thief.close();
+
+    // Legitimate reconnect with token reclaims the seat.
+    const back = await connect(code, "owner-id", "Owner", token);
+    const backSnap = await waitFor(() => back.latestSnapshot());
+    expect(backSnap.you.spectator).toBe(false);
+    expect(backSnap.you.seat).toBe(0);
+    back.close();
   });
 });
