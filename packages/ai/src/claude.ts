@@ -99,10 +99,7 @@ export class ClaudeAIProvider implements AIProvider {
         system: RULESET_CONTRACT,
         messages: [{ role: "user", content: `${instruction}${feedback}` }],
       });
-      const text = message.content
-        .filter((b): b is Anthropic.TextBlock => b.type === "text")
-        .map((b) => b.text)
-        .join("");
+      const text = textFromContent(message.content);
       const json = extractJson(text);
       if (!json) {
         feedback = "\n\nYour previous reply was not valid JSON. Output only the JSON object.";
@@ -147,17 +144,30 @@ export class ClaudeAIProvider implements AIProvider {
           },
         ],
       });
-      const answer = message.content
-        .filter((b): b is Anthropic.TextBlock => b.type === "text")
-        .map((b) => b.text)
-        .join("")
-        .trim()
-        .toLowerCase();
+      const answer = textFromContent(message.content).trim().toLowerCase();
       return answer.startsWith("y");
     } catch {
       return this.stub.judgeSpeech(text, forbiddenDescription);
     }
   }
+}
+
+/**
+ * Concatenate the text of a Messages response's content blocks. Written against
+ * `unknown` rather than the SDK's block union so it stays correct across SDK
+ * type revisions and never depends on a specific exported block-type name.
+ */
+function textFromContent(content: unknown): string {
+  if (!Array.isArray(content)) return "";
+  return (content as unknown[])
+    .map((b: unknown) => {
+      if (b && typeof b === "object" && (b as { type?: unknown }).type === "text") {
+        const t = (b as { text?: unknown }).text;
+        return typeof t === "string" ? t : "";
+      }
+      return "";
+    })
+    .join("");
 }
 
 /** Pull the first balanced JSON object out of a model reply. */
