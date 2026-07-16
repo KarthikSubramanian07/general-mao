@@ -127,6 +127,7 @@ export function setupGame(seed: string, names: string[], ruleset: SecretRuleset)
       penaltyCount: 0,
       finished: false,
       place: null,
+      secret: `test-secret-${i}`,
     });
   });
   dealRound(state, ruleset, 0);

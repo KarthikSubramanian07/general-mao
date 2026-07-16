@@ -9,7 +9,7 @@
  * post-match reveal.
  */
 
-import { type AIProvider, createAIProvider } from "@mao/ai";
+import { type AIProvider, createAIProvider, StubAIProvider } from "@mao/ai";
 import {
   createEmptyState,
   dealRound,
@@ -39,6 +39,7 @@ interface ConnState {
   playerId: string;
   name: string;
   spectator: boolean;
+  lastChatAt: number;
 }
 
 interface TableMeta {
@@ -54,6 +55,9 @@ const DEFAULT_CONFIG: TableConfig = {
   revealRules: false,
   maxPlayers: 6,
 };
+
+/** Minimum gap between chat messages that may trigger AI speech judgment. */
+const CHAT_COOLDOWN_MS = 800;
 
 export class TableServer extends Server<Env> {
   static override options = { hibernate: true };
@@ -71,6 +75,10 @@ export class TableServer extends Server<Env> {
     const state = await this.ctx.storage.get<GameState>("state");
     this.state = state ?? createEmptyState(this.name, this.meta.config, this.name);
     this.ruleset = (await this.ctx.storage.get<SecretRuleset>("ruleset")) ?? null;
+    // Migrate seats created before seat secrets existed.
+    for (const seat of this.state.seats) {
+      if (!seat.secret) seat.secret = crypto.randomUUID();
+    }
   }
 
   // -- persistence ---------------------------------------------------------
@@ -108,6 +116,7 @@ export class TableServer extends Server<Env> {
         mode: this.meta.config.mode,
         difficulty: this.meta.config.difficulty,
         penalties: this.state.ledger.length,
+        inited: this.meta.inited,
       });
     }
     return new Response("Not found", { status: 404 });
@@ -117,22 +126,34 @@ export class TableServer extends Server<Env> {
 
   override async onConnect(conn: Connection, ctx: ConnectionContext): Promise<void> {
     const url = new URL(ctx.request.url);
-    const playerId = url.searchParams.get("id") ?? crypto.randomUUID();
+    let playerId = url.searchParams.get("id") ?? crypto.randomUUID();
+    const offeredToken = url.searchParams.get("token") ?? "";
     const rawName = (url.searchParams.get("name") ?? "").slice(0, 24).trim();
     const wantsSpectate = url.searchParams.get("spectate") === "1";
 
     const existing = this.state.seats.findIndex((s) => s.playerId === playerId);
     if (existing >= 0) {
       const seat = this.state.seats[existing];
-      if (seat) {
+      // Require the seat secret so a guessed playerId cannot reclaim a hand.
+      if (seat?.secret && offeredToken === seat.secret) {
         seat.connected = true;
         if (rawName) seat.name = rawName;
+        conn.setState({
+          playerId,
+          name: seat.name,
+          spectator: false,
+          lastChatAt: 0,
+        } satisfies ConnState);
+      } else {
+        // Claim rejected: sit as a spectator under a fresh identity.
+        playerId = crypto.randomUUID();
+        conn.setState({
+          playerId,
+          name: rawName || "Spectator",
+          spectator: true,
+          lastChatAt: 0,
+        } satisfies ConnState);
       }
-      conn.setState({
-        playerId,
-        name: seat?.name ?? rawName,
-        spectator: false,
-      } satisfies ConnState);
     } else if (
       !wantsSpectate &&
       this.state.phase === "lobby" &&
@@ -140,6 +161,7 @@ export class TableServer extends Server<Env> {
     ) {
       const name = rawName || `Player ${this.state.seats.length + 1}`;
       const isHost = this.state.seats.length === 0;
+      const secret = crypto.randomUUID();
       this.state.seats.push({
         playerId,
         name,
@@ -149,18 +171,26 @@ export class TableServer extends Server<Env> {
         penaltyCount: 0,
         finished: false,
         place: null,
+        secret,
       });
-      conn.setState({ playerId, name, spectator: false } satisfies ConnState);
+      conn.setState({ playerId, name, spectator: false, lastChatAt: 0 } satisfies ConnState);
     } else {
       conn.setState({
         playerId,
         name: rawName || "Spectator",
         spectator: true,
+        lastChatAt: 0,
       } satisfies ConnState);
     }
 
     await this.persist();
-    this.send(conn, { t: "welcome", youId: playerId, code: this.name });
+    const seated = this.state.seats.find((s) => s.playerId === playerId);
+    this.send(conn, {
+      t: "welcome",
+      youId: playerId,
+      code: this.name,
+      token: seated?.secret ?? null,
+    });
     this.syncOne(conn);
     this.syncAll();
   }
@@ -220,6 +250,10 @@ export class TableServer extends Server<Env> {
         return this.handlePointOfOrder(cs, false);
       case "rematch":
         return this.handleRematch(cs);
+      default: {
+        const _exhaustive: never = msg;
+        void _exhaustive;
+      }
     }
   }
 
@@ -241,6 +275,7 @@ export class TableServer extends Server<Env> {
     if (this.state.seats.some((s) => s.playerId === cs.playerId)) return;
     if (this.state.seats.length >= this.meta.config.maxPlayers) return;
     const isHost = this.state.seats.length === 0;
+    const secret = crypto.randomUUID();
     this.state.seats.push({
       playerId: cs.playerId,
       name: cs.name,
@@ -250,9 +285,16 @@ export class TableServer extends Server<Env> {
       penaltyCount: 0,
       finished: false,
       place: null,
+      secret,
     });
     cs.spectator = false;
     conn.setState({ ...cs });
+    this.send(conn, {
+      t: "welcome",
+      youId: cs.playerId,
+      code: this.name,
+      token: secret,
+    });
     await this.persist();
     this.syncAll();
   }
@@ -315,7 +357,6 @@ export class TableServer extends Server<Env> {
     const ruleset = await this.ai.generateRuleset(req);
     // Defense in depth: never seat an inconsistent General.
     if (!validateRuleset(ruleset).ok) {
-      const { StubAIProvider } = await import("@mao/ai");
       return new StubAIProvider().generateRuleset(req);
     }
     return ruleset;
@@ -327,7 +368,7 @@ export class TableServer extends Server<Env> {
     card: string,
     declaredSuit: Suit | undefined,
   ): Promise<void> {
-    if (!this.ruleset) return;
+    if (!this.ruleset || cs.spectator) return;
     const em = playCard(this.state, this.ruleset, cs.playerId, card, declaredSuit, {
       now: Date.now(),
     });
@@ -338,7 +379,7 @@ export class TableServer extends Server<Env> {
   }
 
   private async handleDraw(conn: Connection, cs: ConnState): Promise<void> {
-    if (!this.ruleset) return;
+    if (!this.ruleset || cs.spectator) return;
     const em = drawCard(this.state, this.ruleset, cs.playerId, { now: Date.now() });
     if (em.reject) this.send(conn, { t: "toast", level: "warn", text: em.reject });
     this.emit(em);
@@ -347,13 +388,20 @@ export class TableServer extends Server<Env> {
   }
 
   private async handleChat(cs: ConnState, text: string): Promise<void> {
+    // Spectators must not speak (or trigger billable speech judgment).
     const seat = this.state.seats.find((s) => s.playerId === cs.playerId);
+    if (!seat || cs.spectator) return;
+
+    const now = Date.now();
+    if (now - cs.lastChatAt < CHAT_COOLDOWN_MS) return;
+    cs.lastChatAt = now;
+
     const message: ChatMessage = {
       id: crypto.randomUUID(),
       playerId: cs.playerId,
-      playerName: seat?.name ?? cs.name,
+      playerName: seat.name,
       text,
-      at: Date.now(),
+      at: now,
       system: false,
     };
     this.state.chat.push(message);
@@ -362,7 +410,7 @@ export class TableServer extends Server<Env> {
 
     if (this.ruleset && this.state.phase === "playing") {
       const aiVerdicts = await this.judgeSemantic(text);
-      const em = postChat(this.state, this.ruleset, message, { now: Date.now(), aiVerdicts });
+      const em = postChat(this.state, this.ruleset, message, { now, aiVerdicts });
       this.emit(em);
     }
     await this.persist();

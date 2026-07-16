@@ -29,7 +29,7 @@ export const tableConfigInputSchema = z.object({
   difficulty: difficultySchema.optional(),
   themeId: z.string().max(64).nullable().optional(),
   byoRules: z.string().max(4000).nullable().optional(),
-  maxPlayers: z.number().int().min(2).max(8).optional(),
+  maxPlayers: z.number().int().min(2).max(6).optional(),
 });
 export type TableConfigInput = z.infer<typeof tableConfigInputSchema>;
 
@@ -83,7 +83,7 @@ export interface SelfView {
 }
 
 export type ServerMessage =
-  | { t: "welcome"; youId: string; code: string }
+  | { t: "welcome"; youId: string; code: string; token: string | null }
   | { t: "snapshot"; state: PublicGameState; you: SelfView; chat: ChatMessage[] }
   | { t: "penalty"; entry: LedgerEntry }
   | { t: "verdict"; verdict: Verdict }

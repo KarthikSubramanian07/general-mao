@@ -26,6 +26,11 @@ export interface Seat {
   penaltyCount: number;
   finished: boolean;
   place: number | null;
+  /**
+   * Opaque seat-claim secret. Never copied by the sanitizer; required to reclaim
+   * a seat after reconnect so a guessed playerId cannot steal a hand.
+   */
+  secret: string;
 }
 
 export interface PendingObligation {
