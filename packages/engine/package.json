@@ -1,0 +1,21 @@
+{
+  "name": "@mao/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Server-only deterministic Mao rules engine. Never imported by the web client.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mao/protocol": "*",
+    "zod": "^3.24.1"
+  }
+}
