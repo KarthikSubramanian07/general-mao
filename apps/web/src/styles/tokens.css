@@ -1,0 +1,110 @@
+/*
+ * General Mao design tokens, "The Tribunal".
+ * Dark-first, committed. One accent (oxblood penalty), rationed brass seal.
+ * See DESIGN.md for the physical scene and rationale.
+ */
+
+:root {
+  /* ---- color: chrome & felt --------------------------------------------- */
+  --gm-ink: oklch(0.165 0.008 265);
+  --gm-ink-deep: oklch(0.118 0.008 265);
+  --gm-felt: oklch(0.245 0.036 158);
+  --gm-felt-edge: oklch(0.175 0.03 158);
+  --gm-felt-line: oklch(0.3 0.03 158);
+
+  /* ---- color: surfaces & lines ------------------------------------------ */
+  --gm-surface-1: oklch(0.205 0.008 265);
+  --gm-surface-2: oklch(0.235 0.008 265);
+  --gm-surface-3: oklch(0.278 0.009 265);
+  --gm-line: oklch(0.32 0.008 265);
+  --gm-line-strong: oklch(0.405 0.009 265);
+  --gm-line-faint: oklch(0.26 0.008 265);
+
+  /* ---- color: text ------------------------------------------------------ */
+  --gm-text: oklch(0.955 0.004 265);
+  --gm-text-2: oklch(0.755 0.006 265);
+  --gm-text-muted: oklch(0.605 0.006 265);
+  --gm-text-faint: oklch(0.46 0.006 265);
+
+  /* ---- color: the one accent + rationed brass --------------------------- */
+  --gm-penalty: oklch(0.605 0.19 24);
+  --gm-penalty-hover: oklch(0.66 0.19 24);
+  --gm-penalty-deep: oklch(0.42 0.14 25);
+  --gm-penalty-tint: oklch(0.605 0.19 24 / 0.11);
+  --gm-penalty-line: oklch(0.605 0.19 24 / 0.35);
+  --gm-brass: oklch(0.755 0.09 82);
+  --gm-brass-deep: oklch(0.58 0.08 78);
+
+  /* ---- color: semantic (rare, state only) ------------------------------- */
+  --gm-legal: oklch(0.74 0.13 155);
+  --gm-focus: oklch(0.7 0.11 250);
+
+  /* ---- card faces ------------------------------------------------------- */
+  --gm-card-face: oklch(0.955 0.006 90);
+  --gm-card-ink: oklch(0.22 0.01 265);
+  --gm-card-red: oklch(0.55 0.2 25);
+  --gm-card-back: oklch(0.31 0.05 20);
+
+  /* ---- type ------------------------------------------------------------- */
+  --font-general: "Zilla Slab", ui-serif, Georgia, serif;
+  --font-ui: "Archivo Variable", "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-ledger: "Fragment Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* fixed product scale (1.2) */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 1.875rem;
+  --fs-3xl: 2.25rem;
+  /* brand display (fluid, capped) */
+  --fs-display: clamp(2.75rem, 7vw, 5.25rem);
+  --fs-hero-sub: clamp(1.0625rem, 2.2vw, 1.375rem);
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.2;
+  --lh-body: 1.55;
+
+  /* ---- spacing (4px base) ----------------------------------------------- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --sp-9: 6rem;
+  --sp-10: 8rem;
+
+  /* ---- radii (sharp) ---------------------------------------------------- */
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-lg: 6px;
+  --r-pill: 999px;
+
+  /* ---- elevation (hairline + low ambient, no glow) ---------------------- */
+  --elev-hairline: 0 0 0 1px var(--gm-line);
+  --elev-1: 0 0 0 1px var(--gm-line), 0 1px 2px oklch(0 0 0 / 0.4);
+  --elev-2: 0 0 0 1px var(--gm-line-strong), 0 12px 32px -12px oklch(0 0 0 / 0.7);
+  --elev-card: 0 1px 1px oklch(0 0 0 / 0.35), 0 6px 16px -8px oklch(0 0 0 / 0.5);
+
+  /* ---- motion ----------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --dur-fast: 140ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+
+  /* ---- z-index scale ---------------------------------------------------- */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-drawer: 200;
+  --z-backdrop: 300;
+  --z-modal: 310;
+  --z-toast: 400;
+  --z-tooltip: 500;
+}
