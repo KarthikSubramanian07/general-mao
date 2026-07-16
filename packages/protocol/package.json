@@ -1,0 +1,20 @@
+{
+  "name": "@mao/protocol",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Client-safe wire types and Zod message schemas. Contains no secret rule data by construction.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  }
+}
