@@ -1,0 +1,36 @@
+{
+  "name": "general-mao",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The card game where the house makes the rules, and won't tell you what they are.",
+  "type": "module",
+  "packageManager": "npm@11.9.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@mao/server & npm run dev --workspace=@mao/web",
+    "dev:server": "npm run dev --workspace=@mao/server",
+    "dev:web": "npm run dev --workspace=@mao/web",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "tsc --build --verbose",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "deploy": "npm run deploy --workspace=@mao/server && npm run deploy --workspace=@mao/web",
+    "prepare": "lefthook install || true"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "lefthook": "^1.13.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.0"
+  }
+}
