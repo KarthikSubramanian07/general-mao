@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /t/
+Disallow: /watch/
+
+Sitemap: https://general-mao.pages.dev/sitemap.xml
