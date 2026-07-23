@@ -19,7 +19,7 @@
     "partyserver": "0.5.8"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.18.5",
+    "@cloudflare/vitest-pool-workers": "^0.18.7",
     "wrangler": "^4.111.0",
     "vitest": "^4.1.0"
   }
