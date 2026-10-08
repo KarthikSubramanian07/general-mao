@@ -5,11 +5,11 @@ const inline = config.build?.assetsInlineLimit;
 
 describe("vite build config", () => {
   it("never inlines fonts as data: URLs (the CSP only allows font-src 'self')", () => {
-    expect(typeof inline).toBe("function");
-    const decide = inline as (file: string, content: Buffer) => boolean | undefined;
-    const tiny = new Uint8Array(10) as unknown as Buffer;
-    expect(decide("/x/fragment-mono-latin-ext-400-normal.woff2", tiny)).toBe(false);
-    expect(decide("/x/zilla-slab-latin-400-normal.woff", tiny)).toBe(false);
-    expect(decide("/x/seal.svg", tiny)).toBeUndefined();
+    if (typeof inline !== "function") throw new Error("assetsInlineLimit must be a function");
+    const tiny = new Uint8Array(10) as unknown as Parameters<typeof inline>[1];
+    const decide = (file: string) => inline(file, tiny);
+    expect(decide("/x/fragment-mono-latin-ext-400-normal.woff2")).toBe(false);
+    expect(decide("/x/zilla-slab-latin-400-normal.woff")).toBe(false);
+    expect(decide("/x/seal.svg")).toBeUndefined();
   });
 });
