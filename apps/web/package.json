@@ -6,7 +6,7 @@
   "description": "The General Mao web client: static landing + real-time table.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --build",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=general-mao"
