@@ -10,17 +10,18 @@ import "./styles/game.css";
 import "./styles/landing.css";
 
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./App.js";
 
 const root = document.getElementById("root");
-if (root) {
-  createRoot(root).render(
-    <StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </StrictMode>,
-  );
-}
+const app = (
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
+);
+// Prerendered pages (scripts/prerender.mjs) hydrate; the app shell renders fresh.
+if (root?.dataset.prerendered !== undefined) hydrateRoot(root, app);
+else if (root) createRoot(root).render(app);

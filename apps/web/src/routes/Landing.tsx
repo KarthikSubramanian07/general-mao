@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Seal, Wordmark } from "../components/Seal.js";
+import { Seal } from "../components/Seal.js";
+import { SiteFooter, SiteHeader } from "../components/SiteChrome.js";
+import { COFFEE_URL } from "../content/site.js";
 import { useReveal } from "../lib/useReveal.js";
 
 const CRYPTIC = [
@@ -14,22 +16,13 @@ export function Landing() {
   const root = useReveal<HTMLDivElement>();
   return (
     <div className="landing" ref={root}>
-      <header className="landing__nav">
-        <Wordmark />
-        <nav className="landing__navlinks">
-          <a href="#how">How it works</a>
-          <a href="#general">The General</a>
-          <a href="#faq">Questions</a>
-          <Link className="btn btn--sm btn--primary" to="/play">
-            Convene a table
-          </Link>
-        </nav>
-      </header>
+      <SiteHeader onLanding />
 
       {/* ---- hero ---- */}
       <section className="hero">
         <div className="hero__copy">
           <h1 className="hero__title">
+            <span className="hero__eyebrow gm-label">General Mao, the online Mao card game</span>{" "}
             The house makes the rules.
             <span className="hero__title-2"> It won't tell you what they are.</span>
           </h1>
@@ -222,7 +215,7 @@ export function Landing() {
             Nothing. It's a personal project, free forever, no ads during play, no paywalls. If you
             feel moved to it, you can{" "}
             <a
-              href="https://buymeacoffee.com/winnerkarthik"
+              href={COFFEE_URL}
               target="_blank"
               rel="noreferrer"
               style={{ color: "var(--gm-penalty)" }}
@@ -234,19 +227,7 @@ export function Landing() {
         </div>
       </section>
 
-      <footer className="landing__footer">
-        <div className="landing__footer-inner">
-          <Wordmark compact />
-          <p className="gm-general">"The only rule I may tell you is this one."</p>
-          <div className="landing__footer-links">
-            <Link to="/play">Convene a table</Link>
-            <a href="https://buymeacoffee.com/winnerkarthik" target="_blank" rel="noreferrer">
-              Buy the General a coffee
-            </a>
-            <span>MIT. Free forever.</span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

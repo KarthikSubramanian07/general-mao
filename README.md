@@ -53,7 +53,8 @@ Two invariants, both tested, govern every decision. Details in [DECISIONS.md](./
 ## Architecture
 
 ```
-Browser ── Cloudflare Pages (static SPA: SEO landing + game room)
+Browser ── Cloudflare Pages (prerendered landing + trust pages, SPA game room)
+   │        Pages middleware: Markdown for agents, real 404s
    │  HTTP -> matchmaking API      WSS -> the table's Durable Object
    v
 Worker ── Hono API  +  TableServer (one Durable Object per table)
@@ -63,6 +64,15 @@ Worker ── Hono API  +  TableServer (one Durable Object per table)
 ```
 
 The single paid dependency, the LLM, sits behind an `AIProvider` interface with a deterministic stub as the default. With no key, the game runs fully and every test passes. Real Claude activates fresh ruleset generation and richer natural-language judgment, and every generated ruleset must clear the engine's consistency validator before a match, or it falls back to the stub. So money starts only where the spec says it should, and never breaks the game.
+
+## Readable by agents, not just people
+
+The landing, About, Contact, and Privacy pages are prerendered to HTML at build time (`scripts/prerender.mjs`), so their content exists without JavaScript; the client hydrates the same markup. A small Pages middleware (`apps/web/functions/_middleware.ts`, logic in `src/edge/handler.ts`) answers `Accept: text/markdown` on every page with a Markdown rendition and `Vary: Accept`, serves the same Markdown at `<path>.md`, and returns a real `404` (Markdown or HTML) for unknown paths. [`/llms.txt`](https://general-mao.pages.dev/llms.txt) tells agents when General Mao is the right tool and how to create a table through the API.
+
+```bash
+curl -i -H 'Accept: text/markdown' https://general-mao.pages.dev/
+curl -i -H 'Accept: text/markdown' https://general-mao.pages.dev/no-such-page   # 404, Markdown body
+```
 
 ## Layout
 
@@ -79,7 +89,7 @@ apps/
 ## Tests
 
 ```bash
-npm test                          # engine + protocol + ai (pure, hermetic, node)
+npm test                          # engine + protocol + ai + web edge/prerender (pure, hermetic, node)
 npm test --workspace=@mao/server  # the Durable Object over a real WebSocket (workerd)
 npm run check                     # typecheck + lint + all of the above
 ```
