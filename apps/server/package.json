@@ -15,12 +15,12 @@
     "@mao/ai": "*",
     "@mao/engine": "*",
     "@mao/protocol": "*",
-    "hono": "^4.6.14",
+    "hono": "^4.12.34",
     "partyserver": "0.5.8"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.18.5",
-    "wrangler": "^4.111.0",
-    "vitest": "^4.1.0"
+    "@cloudflare/vitest-pool-workers": "^0.18.7",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.113.0"
   }
 }
