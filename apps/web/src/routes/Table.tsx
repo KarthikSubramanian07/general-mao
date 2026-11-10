@@ -1,17 +1,24 @@
 import type { Card, Difficulty, PublicGameState, RulesetMode, SelfView, Suit } from "@mao/protocol";
 import { cardId, SUITS } from "@mao/protocol";
-import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import type { FormEvent, ReactNode, RefObject } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { CardBack, CardStack, PlayingCard } from "../components/Card.js";
 import { Chat } from "../components/Chat.js";
 import { Ledger } from "../components/Ledger.js";
 import { Seal, Wordmark } from "../components/Seal.js";
+import { SkipLink } from "../components/SkipLink.js";
 import { Toasts } from "../components/Toasts.js";
 import { getName, setName as persistName } from "../lib/identity.js";
 import { useTable } from "../lib/useTable.js";
 
 const SUIT_GLYPH: Record<Suit, string> = { clubs: "♣", diamonds: "♦", hearts: "♥", spades: "♠" };
+const SUIT_NAME: Record<Suit, string> = {
+  clubs: "clubs",
+  diamonds: "diamonds",
+  hearts: "hearts",
+  spades: "spades",
+};
 
 function isBaseLegal(state: PublicGameState, card: Card): boolean {
   if (!state.topCard) return true;
@@ -24,15 +31,20 @@ export function Table({ spectate = false }: { spectate?: boolean }) {
   const { state, you, feed, toasts, send, dismissToast } = t;
   const [armedSuit, setArmedSuit] = useState<Suit | null>(null);
   const [railOpen, setRailOpen] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [freshCards, setFreshCards] = useState<Set<string>>(new Set());
+  const [nameDraft, setNameDraft] = useState("");
+  const [needsName, setNeedsName] = useState(() => !getName());
   const prevIds = useRef<Set<string> | null>(null);
+  const nameDialogRef = useRef<HTMLDialogElement>(null);
+  const railId = useId();
 
   // Mark newly-arrived cards so they play the deal/penalty slide. On first load
   // the whole opening hand is treated as already present (no mass animation).
   const handKey = you?.hand.map(cardId).join(",");
   // biome-ignore lint/correctness/useExhaustiveDependencies: handKey captures hand
   useEffect(() => {
-    if (!you) return;
+    if (!you || paused) return;
     const ids = new Set(you.hand.map(cardId));
     if (prevIds.current === null) {
       prevIds.current = ids;
@@ -44,28 +56,91 @@ export function Table({ spectate = false }: { spectate?: boolean }) {
     setFreshCards(new Set(added));
     const timer = setTimeout(() => setFreshCards(new Set()), 440);
     return () => clearTimeout(timer);
-  }, [handKey]);
+  }, [handKey, paused]);
 
-  const nameMissing = !getName();
   useEffect(() => {
-    if (nameMissing) {
-      const n = window.prompt("How shall the General address you?", "")?.trim();
-      if (n) {
-        persistName(n);
-        send({ t: "set-name", name: n });
-      }
+    const dialog = nameDialogRef.current;
+    if (!dialog) return;
+    if (needsName) {
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) {
+      dialog.close();
     }
-  }, [nameMissing, send]);
+  }, [needsName]);
+
+  useEffect(() => {
+    if (!railOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setRailOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [railOpen]);
+
+  const statusLine = useMemo(() => {
+    if (!state || !you) return "Approaching the bench.";
+    if (state.phase === "lobby") {
+      return `Lobby: ${state.players.length} of ${state.config.maxPlayers} seated. Table code ${code.toUpperCase()}.`;
+    }
+    if (state.phase === "finished") {
+      const winner = [...state.players].sort((a, b) => (a.place ?? 99) - (b.place ?? 99))[0];
+      return winner
+        ? `Match over. ${winner.name} finished first with ${winner.penaltyCount} penalties.`
+        : "Match over.";
+    }
+    if (state.phase === "point-of-order") {
+      return "Point of order. Cards down. Play is paused until resume.";
+    }
+    const current = state.players.find((p) => p.seat === state.currentSeat);
+    const whose = you.isYourTurn
+      ? "It is your move."
+      : current
+        ? `${current.name}'s turn.`
+        : "Waiting for the next move.";
+    const top = state.topCard
+      ? `Top card ${state.topCard.rank} of ${state.topCard.suit}.`
+      : "No discard yet.";
+    const suit = state.activeSuit ? `Suit in force: ${state.activeSuit}.` : "";
+    const draw = state.pendingDraw > 0 ? `Draw ${state.pendingDraw} owed.` : "";
+    const hand = you.seat !== null ? `You hold ${you.hand.length} cards.` : "You are watching.";
+    return [whose, top, suit, draw, hand].filter(Boolean).join(" ");
+  }, [state, you, code]);
+
+  const submitName = (e: FormEvent) => {
+    e.preventDefault();
+    const n = nameDraft.trim();
+    if (!n) return;
+    persistName(n);
+    send({ t: "set-name", name: n });
+    setNeedsName(false);
+  };
 
   if (!state || !you) {
     return (
-      <div className="table-loading">
-        <Seal size={52} />
-        <p className="gm-general" style={{ fontSize: "1.25rem" }}>
-          Approaching the bench…
-        </p>
-        {t.status === "closed" && <p style={{ color: "var(--gm-text-muted)" }}>Reconnecting.</p>}
-      </div>
+      <>
+        <SkipLink />
+        <main id="main" className="table-loading" tabIndex={-1}>
+          <Seal size={52} decorative />
+          <p className="gm-general" style={{ fontSize: "1.25rem" }}>
+            Approaching the bench…
+          </p>
+          {t.status === "closed" && (
+            <p style={{ color: "var(--gm-text-muted)" }} role="status">
+              Reconnecting.
+            </p>
+          )}
+          <p className="sr-only" aria-live="polite">
+            {statusLine}
+          </p>
+        </main>
+        <NameDialog
+          dialogRef={nameDialogRef}
+          open={needsName}
+          value={nameDraft}
+          onChange={setNameDraft}
+          onSubmit={submitName}
+        />
+      </>
     );
   }
 
@@ -76,29 +151,46 @@ export function Table({ spectate = false }: { spectate?: boolean }) {
   const yourTurn = you.isYourTurn;
 
   const playCard = (card: Card) => {
+    if (paused) return;
     send({ t: "play", card: cardId(card), ...(armedSuit ? { declaredSuit: armedSuit } : {}) });
     setArmedSuit(null);
   };
 
   return (
-    <div className="table-room">
+    <div className={`table-room ${paused ? "table-room--paused" : ""}`}>
+      <SkipLink />
       <header className="table-top">
-        <Wordmark compact />
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <Link to="/">
+          <Wordmark compact />
+          <span className="sr-only"> home</span>
+        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
           <ShareCode code={code.toUpperCase()} />
           <ConnPill status={t.status} />
+          <button
+            type="button"
+            className="btn btn--sm btn--ghost"
+            onClick={() => setPaused((p) => !p)}
+            aria-pressed={paused}
+          >
+            {paused ? "Resume" : "Pause"}
+          </button>
           <button
             type="button"
             className="btn btn--sm btn--ghost rail-toggle"
             onClick={() => setRailOpen((o) => !o)}
             aria-expanded={railOpen}
+            aria-controls={railId}
           >
             Ledger ({state.ledger.length})
           </button>
         </div>
       </header>
 
-      <div className="table-board">
+      <main id="main" className="table-board" tabIndex={-1}>
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {paused ? `Paused. ${statusLine}` : statusLine}
+        </p>
         <Seats state={state} youId={you.id} />
 
         {phase === "lobby" && (
@@ -134,11 +226,14 @@ export function Table({ spectate = false }: { spectate?: boolean }) {
                   {state.activeSuit && (
                     <span className="suit-flag">
                       in force{" "}
-                      <strong style={{ fontSize: "1.1rem" }}>{SUIT_GLYPH[state.activeSuit]}</strong>
+                      <strong style={{ fontSize: "1.1rem" }} aria-hidden="true">
+                        {SUIT_GLYPH[state.activeSuit]}
+                      </strong>{" "}
+                      <span>{SUIT_NAME[state.activeSuit]}</span>
                     </span>
                   )}
                   <span className="suit-flag">
-                    {state.direction === 1 ? "↻ clockwise" : "↺ widdershins"}
+                    {state.direction === 1 ? "clockwise" : "widdershins"}
                   </span>
                   {state.pendingDraw > 0 && (
                     <span className="suit-flag" style={{ color: "var(--gm-penalty)" }}>
@@ -225,19 +320,75 @@ export function Table({ spectate = false }: { spectate?: boolean }) {
         {phase === "finished" && (
           <Finished state={state} isHost={isHost} onRematch={() => send({ t: "rematch" })} />
         )}
-      </div>
+      </main>
 
-      <aside className={`table-rail ${railOpen ? "table-rail--open" : ""}`}>
+      <aside
+        id={railId}
+        className={`table-rail ${railOpen ? "table-rail--open" : ""}`}
+        aria-label="Ledger and chat"
+      >
         <Ledger entries={state.ledger} />
         <Chat
           feed={feed}
-          disabled={spectate || !isSeated}
+          disabled={spectate || !isSeated || paused}
           onSend={(text) => send({ t: "chat", text })}
         />
       </aside>
 
       <Toasts toasts={toasts} onDismiss={dismissToast} />
+      <NameDialog
+        dialogRef={nameDialogRef}
+        open={needsName}
+        value={nameDraft}
+        onChange={setNameDraft}
+        onSubmit={submitName}
+      />
     </div>
+  );
+}
+
+function NameDialog({
+  dialogRef,
+  value,
+  onChange,
+  onSubmit,
+}: {
+  dialogRef: RefObject<HTMLDialogElement | null>;
+  open: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  onSubmit: (e: FormEvent) => void;
+}) {
+  return (
+    <dialog
+      ref={dialogRef}
+      className="name-dialog"
+      aria-labelledby="name-dialog-title"
+      onCancel={(e) => {
+        // Name is required to sit; Escape alone must not dismiss without a name.
+        if (!getName()) e.preventDefault();
+      }}
+    >
+      <form onSubmit={onSubmit}>
+        <h2 id="name-dialog-title" className="gm-general">
+          How shall the General address you?
+        </h2>
+        <label className="field">
+          <span>Your name at the bench</span>
+          <input
+            className="input"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            maxLength={24}
+            autoComplete="nickname"
+            required
+          />
+        </label>
+        <button type="submit" className="btn btn--primary">
+          Take my name
+        </button>
+      </form>
+    </dialog>
   );
 }
 
@@ -268,28 +419,42 @@ function DiscardPile({ state }: { state: PublicGameState }) {
 
 function Seats({ state, youId }: { state: PublicGameState; youId: string }) {
   return (
-    <div className="seats">
-      {state.players.map((p) => (
-        <div
-          key={p.id}
-          className={`seat ${state.currentSeat === p.seat && state.phase === "playing" ? "seat--turn" : ""} ${
-            p.finished ? "seat--out" : ""
-          }`}
-        >
-          <span className={`seat__dot ${p.connected ? "" : "seat__dot--off"}`} />
-          <div>
-            <div className="seat__name">
-              {p.name}
-              {p.id === youId && <span className="chip">you</span>}
-              {p.isHost && <span title="Host">✦</span>}
-            </div>
-            <div className="seat__meta">
-              <span>{p.finished ? `#${p.place}` : `${p.handCount} cards`}</span>
-              <span>{p.penaltyCount} pen.</span>
+    <div className="seats" role="list" aria-label="Seats at the table">
+      {state.players.map((p) => {
+        const isTurn = state.currentSeat === p.seat && state.phase === "playing";
+        return (
+          <div
+            key={p.id}
+            role="listitem"
+            className={`seat ${isTurn ? "seat--turn" : ""} ${p.finished ? "seat--out" : ""}`}
+            aria-current={isTurn ? "true" : undefined}
+          >
+            <span
+              className={`seat__dot ${p.connected ? "" : "seat__dot--off"}`}
+              aria-hidden="true"
+            />
+            <div>
+              <div className="seat__name">
+                {p.name}
+                {p.id === youId && <span className="chip">you</span>}
+                {p.isHost && (
+                  <span className="chip" title="Host">
+                    host
+                  </span>
+                )}
+                {isTurn && <span className="seat__turn-flag">to move</span>}
+              </div>
+              <div className="seat__meta">
+                <span>
+                  {p.finished ? `place ${p.place}` : `${p.handCount} cards`}
+                  {p.connected ? "" : ", disconnected"}
+                </span>
+                <span>{p.penaltyCount} penalties</span>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -305,9 +470,9 @@ function SuitPicker({ armed, onArm }: { armed: Suit | null; onArm: (s: Suit | nu
           className={`suit-chip ${armed === s ? "suit-chip--on" : ""} suit-chip--${s}`}
           onClick={() => onArm(armed === s ? null : s)}
           aria-pressed={armed === s}
-          title={`Declare ${s}`}
+          aria-label={`Declare ${SUIT_NAME[s]}`}
         >
-          {SUIT_GLYPH[s]}
+          <span aria-hidden="true">{SUIT_GLYPH[s]}</span>
         </button>
       ))}
     </div>
@@ -502,7 +667,7 @@ function ShareCode({ code }: { code: string }) {
     }
   };
   return (
-    <button type="button" className="chip share-code" onClick={copy} title="Copy invite link">
+    <button type="button" className="chip share-code" onClick={copy}>
       <span className="gm-mono">{code}</span>
       <span>{copied ? "copied" : "share"}</span>
     </button>
@@ -513,8 +678,11 @@ function ConnPill({ status }: { status: "connecting" | "open" | "closed" }) {
   const label =
     status === "open" ? "in session" : status === "connecting" ? "connecting" : "reconnecting";
   return (
-    <span className="chip conn-pill" title={`Connection: ${status}`}>
-      <span className={`seat__dot ${status === "open" ? "" : "seat__dot--off"}`} />
+    <span className="chip conn-pill" role="status" aria-label={`Connection: ${label}`}>
+      <span
+        className={`seat__dot ${status === "open" ? "" : "seat__dot--off"}`}
+        aria-hidden="true"
+      />
       {label}
     </span>
   );
