@@ -27,11 +27,14 @@
   --gm-text-faint: oklch(0.46 0.006 265);
 
   /* ---- color: the one accent + rationed brass --------------------------- */
-  --gm-penalty: oklch(0.605 0.19 24);
-  --gm-penalty-hover: oklch(0.66 0.19 24);
+  /* L 0.55 keeps primary-button text ≥4.5:1 on the oxblood fill (WCAG 1.4.3). */
+  --gm-penalty: oklch(0.55 0.19 24);
+  --gm-penalty-hover: oklch(0.6 0.19 24);
   --gm-penalty-deep: oklch(0.42 0.14 25);
-  --gm-penalty-tint: oklch(0.605 0.19 24 / 0.11);
-  --gm-penalty-line: oklch(0.605 0.19 24 / 0.35);
+  --gm-penalty-tint: oklch(0.55 0.19 24 / 0.11);
+  --gm-penalty-line: oklch(0.55 0.19 24 / 0.35);
+  /* Brighter stamp ink for penalty rows on the tinted ledger ground. */
+  --gm-penalty-bright: oklch(0.74 0.16 24);
   --gm-brass: oklch(0.755 0.09 82);
   --gm-brass-deep: oklch(0.58 0.08 78);
 

@@ -204,6 +204,13 @@
   border-color: var(--gm-brass);
   box-shadow: 0 0 0 1px var(--gm-brass);
 }
+.seat__turn-flag {
+  font-family: var(--font-ledger);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gm-brass);
+}
 .seat--out {
   opacity: 0.55;
 }
@@ -337,6 +344,13 @@
   font-size: var(--fs-sm);
   animation: row-in var(--dur) var(--ease-out) both;
 }
+.table-room--paused .card--fresh,
+.table-room--paused .ledger-row {
+  animation: none !important;
+}
+.table-room--paused .card--interactive:hover {
+  transform: none;
+}
 @keyframes row-in {
   from {
     opacity: 0;
@@ -351,7 +365,7 @@
   background: var(--gm-penalty-tint);
 }
 .ledger-row__seq {
-  color: var(--gm-text-faint);
+  color: var(--gm-text-2);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-xs);
 }
@@ -371,7 +385,7 @@
   color: var(--gm-text);
 }
 .ledger-row__stamp {
-  color: var(--gm-penalty);
+  color: var(--gm-penalty-bright);
   font-size: var(--fs-xs);
   display: flex;
   align-items: center;
@@ -564,6 +578,8 @@
   margin-right: 0.2rem;
 }
 .suit-chip {
+  min-width: 1.75rem;
+  min-height: 1.75rem;
   width: 1.9rem;
   height: 1.9rem;
   display: grid;
@@ -749,4 +765,26 @@
   .table-top .rail-toggle {
     padding: 0.4rem 0.6rem;
   }
+}
+
+/* ---- name dialog -------------------------------------------------------- */
+.name-dialog {
+  border: 1px solid var(--gm-line-strong);
+  border-radius: var(--r-lg);
+  background: var(--gm-surface-1);
+  color: var(--gm-text);
+  padding: var(--sp-5);
+  max-width: min(24rem, calc(100vw - 2rem));
+  box-shadow: var(--elev-2);
+}
+.name-dialog::backdrop {
+  background: oklch(0.1 0.01 265 / 0.72);
+}
+.name-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.name-dialog h2 {
+  font-size: 1.35rem;
 }
