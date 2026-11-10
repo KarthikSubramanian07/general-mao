@@ -102,7 +102,7 @@
   font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--gm-penalty);
+  color: var(--gm-penalty-bright);
 }
 .dossier__rules {
   list-style: none;
@@ -139,7 +139,7 @@
   border-bottom: 1px solid var(--gm-line-faint);
 }
 .dossier__seal {
-  color: var(--gm-penalty);
+  color: var(--gm-penalty-bright);
 }
 
 .redact {
@@ -203,7 +203,7 @@
   padding-top: var(--sp-4);
 }
 .step__n {
-  color: var(--gm-penalty);
+  color: var(--gm-penalty-bright);
   font-size: var(--fs-sm);
   letter-spacing: 0.1em;
 }
@@ -383,7 +383,7 @@
 .play__error {
   margin-top: var(--sp-4);
   text-align: center;
-  color: var(--gm-penalty);
+  color: var(--gm-penalty-bright);
   font-family: var(--font-general);
 }
 .theme-grid {
@@ -564,6 +564,7 @@ html {
   margin-top: var(--sp-3);
   color: var(--gm-text-2);
   line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 .doc__section ul {
   padding-left: 1.2rem;
@@ -574,6 +575,8 @@ html {
   text-decoration-color: var(--gm-penalty);
   text-underline-offset: 3px;
   transition: color 0.2s var(--ease-out);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .doc a:hover {
   color: var(--gm-brass);

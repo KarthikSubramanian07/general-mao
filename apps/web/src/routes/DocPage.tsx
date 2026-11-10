@@ -12,7 +12,7 @@ export function DocPage({ doc }: { doc: Doc }) {
   return (
     <div className="landing">
       <SiteHeader />
-      <main className="doc">
+      <main id="main" className="doc" tabIndex={-1}>
         <p className="gm-label">{doc.eyebrow}</p>
         <h1 className="doc__title gm-general">{doc.title}</h1>
         <p className="doc__lede">

@@ -2,6 +2,7 @@ import type { Difficulty, RulesetMode } from "@mao/protocol";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Wordmark } from "../components/Seal.js";
+import { SkipLink } from "../components/SkipLink.js";
 import { createTable, fetchThemes, type ThemeCard } from "../lib/api.js";
 import { getName, setName } from "../lib/identity.js";
 
@@ -65,109 +66,129 @@ export function Play() {
   };
 
   return (
-    <main className="play">
-      <header className="play__top">
-        <Link to="/" aria-label="General Mao home">
-          <Wordmark compact />
-        </Link>
-      </header>
+    <>
+      <SkipLink />
+      <main id="main" className="play" tabIndex={-1}>
+        <header className="play__top">
+          <Link to="/">
+            <Wordmark compact />
+            <span className="sr-only"> home</span>
+          </Link>
+        </header>
 
-      <div className="play__grid">
-        <section className="gm-panel play__card">
-          <h1 className="gm-general">Convene a table</h1>
-          <p className="play__lede">
-            You invent nothing. The General invents the rules and keeps them. You will learn them
-            the hard way, or not at all.
-          </p>
+        <div className="play__grid">
+          <section className="gm-panel play__card" aria-labelledby="convene-heading">
+            <h1 id="convene-heading" className="gm-general">
+              Convene a table
+            </h1>
+            <p className="play__lede">
+              You invent nothing. The General invents the rules and keeps them. You will learn them
+              the hard way, or not at all.
+            </p>
 
-          <label className="field">
-            <span>Your name at the bench</span>
-            <input
-              className="input"
-              value={name}
-              onChange={(e) => setNameState(e.target.value)}
-              placeholder="e.g. The Defendant"
-              maxLength={24}
-            />
-          </label>
-
-          <label className="field">
-            <span>Ruleset</span>
-            <select
-              className="input"
-              value={mode}
-              onChange={(e) => setMode(e.target.value as RulesetMode)}
-            >
-              <option value="classic">Classic, fully secret rules</option>
-              <option value="themed">Themed deck, pick a flavor, not the rules</option>
-              <option value="practice">Practice, the rules are shown (not really Mao)</option>
-            </select>
-          </label>
-
-          {mode === "themed" && (
-            <div className="theme-grid">
-              {themes.map((th) => (
-                <button
-                  key={th.id}
-                  type="button"
-                  className={`theme-card ${themeId === th.id ? "theme-card--on" : ""}`}
-                  onClick={() => setThemeId(themeId === th.id ? null : th.id)}
-                >
-                  <span className="theme-card__name gm-general">{th.name}</span>
-                  <span className="theme-card__diff">{th.difficulty}</span>
-                  <span className="theme-card__blurb">{th.blurb}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {mode !== "themed" && (
             <label className="field">
-              <span>Severity</span>
+              <span>Your name at the bench</span>
+              <input
+                className="input"
+                value={name}
+                onChange={(e) => setNameState(e.target.value)}
+                placeholder="e.g. The Defendant"
+                maxLength={24}
+                autoComplete="nickname"
+                required
+                aria-invalid={error?.includes("name") ? true : undefined}
+                aria-describedby={error ? "play-error" : undefined}
+              />
+            </label>
+
+            <label className="field">
+              <span>Ruleset</span>
               <select
                 className="input"
-                value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+                value={mode}
+                onChange={(e) => setMode(e.target.value as RulesetMode)}
               >
-                <option value="gentle">Gentle, a few discoverable laws</option>
-                <option value="standard">Standard, the house norm</option>
-                <option value="brutal">Brutal, a dozen interlocking cruelties</option>
+                <option value="classic">Classic, fully secret rules</option>
+                <option value="themed">Themed deck, pick a flavor, not the rules</option>
+                <option value="practice">Practice, the rules are shown (not really Mao)</option>
               </select>
             </label>
-          )}
 
-          <button
-            type="button"
-            className="btn btn--primary btn--lg"
-            onClick={convene}
-            disabled={busy}
-          >
-            {busy ? "Convening…" : "Convene the table"}
-          </button>
-        </section>
+            {mode === "themed" && (
+              <div className="theme-grid" role="group" aria-label="Theme deck">
+                {themes.map((th) => (
+                  <button
+                    key={th.id}
+                    type="button"
+                    className={`theme-card ${themeId === th.id ? "theme-card--on" : ""}`}
+                    onClick={() => setThemeId(themeId === th.id ? null : th.id)}
+                    aria-pressed={themeId === th.id}
+                  >
+                    <span className="theme-card__name gm-general">{th.name}</span>
+                    <span className="theme-card__diff">{th.difficulty}</span>
+                    <span className="theme-card__blurb">{th.blurb}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
-        <section className="gm-panel play__card">
-          <h2 className="gm-general">Answer a summons</h2>
-          <p className="play__lede">Someone has a table waiting. Enter the six-character code.</p>
-          <label className="field">
-            <span>Table code</span>
-            <input
-              className="input input--code"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase().slice(0, 6))}
-              placeholder="••••••"
-              maxLength={6}
-              inputMode="text"
-              autoCapitalize="characters"
-            />
-          </label>
-          <button type="button" className="btn btn--lg" onClick={join}>
-            Take my seat
-          </button>
-        </section>
-      </div>
+            {mode !== "themed" && (
+              <label className="field">
+                <span>Severity</span>
+                <select
+                  className="input"
+                  value={difficulty}
+                  onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+                >
+                  <option value="gentle">Gentle, a few discoverable laws</option>
+                  <option value="standard">Standard, the house norm</option>
+                  <option value="brutal">Brutal, a dozen interlocking cruelties</option>
+                </select>
+              </label>
+            )}
 
-      {error && <p className="play__error">{error}</p>}
-    </main>
+            <button
+              type="button"
+              className="btn btn--primary btn--lg"
+              onClick={convene}
+              disabled={busy}
+            >
+              {busy ? "Convening…" : "Convene the table"}
+            </button>
+          </section>
+
+          <section className="gm-panel play__card" aria-labelledby="join-heading">
+            <h2 id="join-heading" className="gm-general">
+              Answer a summons
+            </h2>
+            <p className="play__lede">Someone has a table waiting. Enter the six-character code.</p>
+            <label className="field">
+              <span>Table code</span>
+              <input
+                className="input input--code"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.toUpperCase().slice(0, 6))}
+                placeholder="••••••"
+                maxLength={6}
+                inputMode="text"
+                autoCapitalize="characters"
+                autoComplete="off"
+                spellCheck={false}
+                aria-describedby={error ? "play-error" : undefined}
+              />
+            </label>
+            <button type="button" className="btn btn--lg" onClick={join}>
+              Take my seat
+            </button>
+          </section>
+        </div>
+
+        {error && (
+          <p id="play-error" className="play__error" role="alert">
+            {error}
+          </p>
+        )}
+      </main>
+    </>
   );
 }

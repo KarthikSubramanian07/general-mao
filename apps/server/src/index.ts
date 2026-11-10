@@ -27,10 +27,18 @@ const ALLOWED_ORIGINS = new Set([
 function isAllowedOrigin(origin: string | undefined): boolean {
   if (!origin) return false;
   if (ALLOWED_ORIGINS.has(origin)) return true;
-  // Cloudflare Pages preview deployments for this project.
   try {
     const u = new URL(origin);
-    return u.protocol === "https:" && u.hostname.endsWith(".general-mao.pages.dev");
+    // Cloudflare Pages preview deployments for this project.
+    if (u.protocol === "https:" && u.hostname.endsWith(".general-mao.pages.dev")) return true;
+    // Any local Vite/preview port (dev servers are not pinned to 5173).
+    if (
+      (u.protocol === "http:" || u.protocol === "https:") &&
+      (u.hostname === "localhost" || u.hostname === "127.0.0.1")
+    ) {
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
