@@ -7,10 +7,13 @@ export function Seal({
   size = 40,
   tone = "brass",
   title = "The General's seal",
+  decorative = false,
 }: {
   size?: number;
   tone?: "brass" | "penalty" | "ink";
   title?: string;
+  /** Hide from the accessibility tree when paired with visible Wordmark text. */
+  decorative?: boolean;
 }) {
   const color =
     tone === "penalty"
@@ -23,11 +26,12 @@ export function Seal({
       width={size}
       height={size}
       viewBox="0 0 48 48"
-      role="img"
-      aria-label={title}
+      role={decorative ? undefined : "img"}
+      aria-hidden={decorative ? true : undefined}
+      aria-label={decorative ? undefined : title}
       style={{ color, flexShrink: 0 }}
     >
-      <title>{title}</title>
+      {!decorative && <title>{title}</title>}
       <g fill="none" stroke="currentColor" strokeWidth="1.5">
         <rect x="3.5" y="3.5" width="41" height="41" rx="2" />
         <rect x="7" y="7" width="34" height="34" rx="1.5" strokeWidth="1" opacity="0.65" />
@@ -37,18 +41,21 @@ export function Seal({
         fill="currentColor"
         opacity="0.9"
       />
-      <text
-        x="24"
-        y="37"
-        textAnchor="middle"
-        fontFamily="var(--font-general)"
-        fontWeight="700"
-        fontSize="12"
-        letterSpacing="0.5"
-        fill="currentColor"
-      >
-        GM
-      </text>
+      {/* Decorative wordmarks omit the GM letters so visible text stays "General Mao" only (2.5.3). */}
+      {!decorative && (
+        <text
+          x="24"
+          y="37"
+          textAnchor="middle"
+          fontFamily="var(--font-general)"
+          fontWeight="700"
+          fontSize="12"
+          letterSpacing="0.5"
+          fill="currentColor"
+        >
+          GM
+        </text>
+      )}
     </svg>
   );
 }
@@ -56,7 +63,7 @@ export function Seal({
 export function Wordmark({ compact = false }: { compact?: boolean }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem" }}>
-      <Seal size={compact ? 28 : 34} />
+      <Seal size={compact ? 28 : 34} decorative />
       <span
         className="gm-general"
         style={{
@@ -66,7 +73,7 @@ export function Wordmark({ compact = false }: { compact?: boolean }) {
           color: "var(--gm-text)",
         }}
       >
-        General&nbsp;Mao
+        General Mao
       </span>
     </span>
   );

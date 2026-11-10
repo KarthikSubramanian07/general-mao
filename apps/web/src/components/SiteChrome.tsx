@@ -1,28 +1,33 @@
 import { Link } from "react-router-dom";
 import { COFFEE_URL } from "../content/site.js";
 import { Wordmark } from "./Seal.js";
+import { SkipLink } from "./SkipLink.js";
 
 /** The brand-register nav, shared by the landing page and the trust pages. */
 export function SiteHeader({ onLanding = false }: { onLanding?: boolean }) {
   const anchor = (id: string) => (onLanding ? `#${id}` : `/#${id}`);
   return (
-    <header className="landing__nav">
-      {onLanding ? (
-        <Wordmark />
-      ) : (
-        <Link to="/" aria-label="General Mao home">
+    <>
+      <SkipLink />
+      <header className="landing__nav">
+        {onLanding ? (
           <Wordmark />
-        </Link>
-      )}
-      <nav className="landing__navlinks">
-        <a href={anchor("how")}>How it works</a>
-        <a href={anchor("general")}>The General</a>
-        <a href={anchor("faq")}>Questions</a>
-        <Link className="btn btn--sm btn--primary" to="/play">
-          Convene a table
-        </Link>
-      </nav>
-    </header>
+        ) : (
+          <Link to="/">
+            <Wordmark />
+            <span className="sr-only"> home</span>
+          </Link>
+        )}
+        <nav className="landing__navlinks" aria-label="Primary">
+          <a href={anchor("how")}>How it works</a>
+          <a href={anchor("general")}>The General</a>
+          <a href={anchor("faq")}>Questions</a>
+          <Link className="btn btn--sm btn--primary" to="/play">
+            Convene a table
+          </Link>
+        </nav>
+      </header>
+    </>
   );
 }
 
