@@ -16,7 +16,7 @@
     "@mao/engine": "*",
     "@mao/protocol": "*",
     "hono": "^4.12.34",
-    "partyserver": "0.5.8"
+    "partyserver": "0.5.10"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.23.0",
