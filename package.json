@@ -28,7 +28,7 @@
     "prepare": "lefthook install || true"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.0",
+    "@biomejs/biome": "^2.6.6",
     "lefthook": "^1.13.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.12"
