@@ -26,6 +26,6 @@
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^6.1.2",
     "vite": "^8.1.5",
-    "wrangler": "^4.113.0"
+    "wrangler": "^4.158.0"
   }
 }
