@@ -3,7 +3,6 @@
 // Runtime types generated with workerd@1.20260710.1 2026-06-01 nodejs_compat
 interface __BaseEnv_Env {
 	CONFIG: KVNamespace;
-	DB: D1Database;
 	GENMAO_ENV: "production";
 	Table: DurableObjectNamespace<import("./src/index").TableServer>;
 }

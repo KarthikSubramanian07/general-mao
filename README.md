@@ -98,7 +98,7 @@ The suite includes the determinism property test and the anti-leak payload audit
 
 ## Built on
 
-TypeScript (strict) · Cloudflare Workers, Durable Objects, Pages, D1, KV · [partyserver](https://github.com/cloudflare/partykit) · Hono · React + Vite · Zod · Vitest · Biome. Type is Zilla Slab (the General's voice), Archivo (the interface), and Fragment Mono (the ledger).
+TypeScript (strict) · Cloudflare Workers, Durable Objects, Pages, KV · [partyserver](https://github.com/cloudflare/partykit) · Hono · React + Vite · Zod · Vitest · Biome. Type is Zilla Slab (the General's voice), Archivo (the interface), and Fragment Mono (the ledger).
 
 ## Design
 

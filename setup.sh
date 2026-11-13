@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 #
 # One-shot, idempotent Cloudflare provisioning for General Mao.
-# Creates the D1 database and KV namespace, wires their IDs into
-# apps/server/wrangler.jsonc, and applies the D1 migrations.
+# Creates the KV namespace and wires its ID into apps/server/wrangler.jsonc.
 #
 # Prerequisites: `npm install` has run, and `npx wrangler login` is done.
 # Safe to run more than once.
@@ -13,22 +12,6 @@ WRANGLER="$ROOT/apps/server/wrangler.jsonc"
 cd "$ROOT/apps/server"
 
 say() { printf "\033[1;36m›\033[0m %s\n" "$*"; }
-
-# --- D1 -------------------------------------------------------------------
-if grep -q "PLACEHOLDER_D1_ID" "$WRANGLER"; then
-  say "Creating D1 database 'general-mao'…"
-  OUT="$(npx wrangler d1 create general-mao 2>&1 || true)"
-  D1_ID="$(printf '%s' "$OUT" | grep -oE '"?database_id"?[[:space:]]*[:=][[:space:]]*"?[a-f0-9-]{36}"?' | grep -oE '[a-f0-9-]{36}' | head -1 || true)"
-  if [ -z "${D1_ID:-}" ]; then
-    say "Database may already exist; looking it up…"
-    D1_ID="$(npx wrangler d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const a=JSON.parse(s);const m=a.find(x=>x.name==="general-mao");process.stdout.write(m?m.uuid:"")})')"
-  fi
-  if [ -z "${D1_ID:-}" ]; then echo "Could not resolve D1 id." >&2; exit 1; fi
-  perl -pi -e "s/PLACEHOLDER_D1_ID/$D1_ID/" "$WRANGLER"
-  say "D1 id → $D1_ID"
-else
-  say "D1 already configured."
-fi
 
 # --- KV -------------------------------------------------------------------
 if grep -q "PLACEHOLDER_KV_ID" "$WRANGLER"; then
@@ -45,10 +28,6 @@ if grep -q "PLACEHOLDER_KV_ID" "$WRANGLER"; then
 else
   say "KV already configured."
 fi
-
-# --- migrations -----------------------------------------------------------
-say "Applying D1 migrations (remote)…"
-npx wrangler d1 migrations apply general-mao --remote -y || say "Migrations skipped or already applied."
 
 cat <<'DONE'
 
