@@ -1,5 +1,5 @@
 /**
- * The Worker environment. Bindings (Table, DB, CONFIG, GENMAO_ENV) come from the
+ * The Worker environment. Bindings (Table, CONFIG, GENMAO_ENV) come from the
  * wrangler-generated `Cloudflare.Env`; the optional Anthropic settings are
  * secrets/vars that may be absent (in which case the deterministic stub runs).
  */

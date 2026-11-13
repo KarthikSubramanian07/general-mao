@@ -20,7 +20,7 @@ That is it. With no API key, the deterministic stub serves a curated ruleset and
 
 You must be logged into Cloudflare once: `npx wrangler login`.
 
-1. **Provision D1 + KV and wire the config** (idempotent)
+1. **Provision KV and wire the config** (idempotent)
    ```bash
    ./setup.sh
    ```

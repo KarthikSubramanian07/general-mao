@@ -18,14 +18,6 @@
       "id": "b17f435b605a4b7c808759d460e100fc"
     }
   ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "general-mao",
-      // Replace via ./setup.sh (wrangler d1 create general-mao).
-      "database_id": "2e7f3fc3-c4ef-4ffd-a21e-d8145adee848"
-    }
-  ],
   "vars": {
     "GENMAO_ENV": "production"
   }

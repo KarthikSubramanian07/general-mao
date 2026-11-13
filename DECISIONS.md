@@ -37,7 +37,6 @@ Worker (Cloudflare Workers, Hono)
         ├─ WebSocket hibernation (idle tables stop billing)
         └─ AIProvider (stub by default; Claude when a key is set)
 
-   D1, finished-match archives + bring-your-own rulesets (scaffolded)
    KV, config + cached themed rulesets
 ```
 
@@ -52,12 +51,12 @@ to the browser even by accident.
   fixed monthly floor those services carry and keeps state and secret co-located with
   the authority. Built on `partyserver`, the Cloudflare-native successor to PartyKit,
   so we did not reinvent WebSocket coordination.
-- **Game state store: Supabase Postgres → DO storage (+ D1 for archives).** The live,
+- **Game state store: Supabase Postgres → DO storage.** The live,
   secret-bearing state belongs in the single-writer DO, not a shared database.
 - **Rules engine: Python edge function → TypeScript.** One language across the stack,
   and the engine is a pure library the DO calls in-process (no extra network hop, no
   second runtime).
-- **Auth: Supabase Auth → deferred, Lucia-style sessions on D1/KV when needed.** No
+- **Auth: Supabase Auth → deferred, Lucia-style sessions on KV when needed.** No
   account is required to play; a magic link is a later, self-hostable addition.
 
 ## Where money starts
@@ -66,7 +65,7 @@ At `$0` for everything except the LLM, and only when a key is present:
 
 | Surface | Cost |
 |---|---|
-| Pages, Workers, Durable Objects, D1, KV | Cloudflare free tier |
+| Pages, Workers, Durable Objects, KV | Cloudflare free tier |
 | Ruleset generation & flagged NL judgment | The only paid path. **Off by default** (stub). |
 
 The single paid dependency sits behind the `AIProvider` interface:
@@ -124,9 +123,11 @@ equally permissive.)
 
 Scaffolded with clean seams, not built in this pass:
 
-- **Bring-your-own-rules permalinks and match archives in D1.** The schema and bindings
-  exist (`migrations/0001_init.sql`); the write paths are not wired. BYO already works
-  end-to-end through the Claude provider at match start.
+- **Bring-your-own-rules permalinks and match archives.** Not built. An unused D1
+  database was scaffolded for them and later removed to free the account's D1 slot;
+  when they land, they belong in the table's Durable Object storage (already SQLite)
+  or KV, both write-once lookups by id. BYO already works end-to-end through the
+  Claude provider at match start.
 - **Accounts / magic-link auth.** Play needs none; the seam is noted above.
 - **The "cracked it" verdict.** The `verdict` wire type and the ceremonial "Correct."
   moment exist and fire on a legal win; automatic detection of a player *stating* a
