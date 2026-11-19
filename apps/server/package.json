@@ -15,7 +15,7 @@
     "@mao/ai": "*",
     "@mao/engine": "*",
     "@mao/protocol": "*",
-    "hono": "^4.13.16",
+    "hono": "^4.13.18",
     "partyserver": "0.5.8"
   },
   "devDependencies": {
