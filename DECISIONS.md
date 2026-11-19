@@ -91,7 +91,7 @@ design. See Anthropic pricing for the chosen model.
   identical state and emissions), the ruleset validator (contradictory effects,
   required-yet-forbidden phrases, unsolvable rulesets), selectors, penalties, and the
   anti-leak audit over sanitized payloads.
-- **Integration (`@cloudflare/vitest-pool-workers`, workerd):** the Durable Object over
+- **Integration (`@cloudflare/vitest-plugin`, workerd):** the Durable Object over
   a real WebSocket, including an anti-leak capture across live traffic and the
   matchmaking API.
 
@@ -115,7 +115,7 @@ equally permissive.)
 | `@fontsource/fragment-mono` | OFL-1.1 | The ledger's court-record mono |
 | `vite`, `@vitejs/plugin-react` | MIT | Build tooling |
 | `@biomejs/biome` | MIT/Apache-2.0 | Lint + format |
-| `vitest`, `@cloudflare/vitest-pool-workers` | MIT | Testing |
+| `vitest`, `@cloudflare/vitest-plugin` | MIT | Testing |
 | `wrangler` | MIT/Apache-2.0 | Cloudflare CLI |
 | `lefthook` | MIT | Git hooks |
 
